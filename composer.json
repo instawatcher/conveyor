@@ -1,0 +1,17 @@
+{
+    "name": "instawatcher/conveyor",
+    "description": "Just a wrapper around mgp25's Instagram API",
+    "type": "project",
+    "license": "MIT",
+    "version": "1.0.0",
+    "authors": [
+        {
+            "name": "Matthew Coal",
+            "email": "matemate001@gmail.com"
+        }
+    ],
+    "require": {
+        "mgp25/instagram-php": "^5.0",
+        "react/http": "^0.8.4"
+    }
+}
