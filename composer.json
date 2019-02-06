@@ -13,6 +13,7 @@
     "require": {
         "mgp25/instagram-php": "^5.0",
         "react/http": "^0.8.4",
-        "monolog/monolog": "^1.24"
+        "monolog/monolog": "^1.24",
+        "vlucas/phpdotenv": "^3.3"
     }
 }

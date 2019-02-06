@@ -9,6 +9,10 @@ use Monolog\Handler\StreamHandler;
 
 require_once __DIR__.'/vendor/autoload.php';
 
+// Loading dotenv file
+\Dotenv\Dotenv::create(__DIR__)->load();
+
+// Creating master loop and logger
 $loop = Factory::create();
 $log = new Logger('conveyor');
 $log->pushHandler(new StreamHandler('php://stdout', Logger::DEBUG));
@@ -62,9 +66,25 @@ $server = new Server(function (ServerRequestInterface $req) use (&$ig, $log) {
   }
 });
 
-// Listening
+// Login
+// TODO: Prepare this for challenges! (note to self: waiting on STDIN usage decision)
 $log->info('Hey there! Conveyor 1.0 is booting up!');
+$log->info('Loggin\' you in...');
+try {
+  $loginResp = $ig->login(getenv('IG_USERNAME'), getenv('IG_PASSWORD'));
+  if ($loginResp !== null && $loginResp->isTwoFactorRequired()) {
+    $ig->finishTwoFactorLogin(getenv('IG_USERNAME'), getenv('IG_PASSWORD'),
+      $loginResp->getTwoFactorInfo()->getTwoFactorIdentifier(), getenv('TWOFACTOR_CODE'));
+    $log->info('Two-factor login completed. Yay!');
+  }
+  $log->info('Single-factor login completed. Yay!');
+} catch (\Exception $e) {
+  $log->error('Conveyor could not log into your IG account. Exiting. Error: '.$e->getMessage());
+  exit(1);
+}
+
+// Listening
 $socket = new \React\Socket\Server(isset($argv[1]) ? $argv[1] : '0.0.0.0:8000', $loop);
 $server->listen($socket);
-$log->info('Listening on *:8000');
+$log->info('Conveyor listening on *:8000');
 $loop->run();
