@@ -46,22 +46,51 @@ $server = new Server(function (ServerRequestInterface $req) use (&$ig, $log) {
     case '/ping':
       // General ping
       $log->debug('Ping request, doing nothing.');
-      return new Response(200, DEFAULT_HEADERS, json_encode(['pong' => true, 'request_start' => $req->getServerParams()['REQUEST_TIME']]));
+      return new Response(200, DEFAULT_HEADERS, json_encode([
+        'status' => 'OK',
+        'pong' => true,
+        'request_start' => $req->getServerParams()['REQUEST_TIME'],
+      ]));
     default:
       // Everything else (try to call $ig->[path]->[here])
-      // TODO: Sanitize!
-      $ret = call_user_func_array([$ig, substr($path, 1)], $bod->args);
+
+      // Sanitizing
+      if (!preg_match('/^[A-Z0-9\/]*$/i', $path))
+        throw new \Exception('Unacceptable character in requested URL');
+      
+      // Deep searching for requested method
+      $callpath = explode('/', substr($path, 1));
+      $cobj = $ig;
+      $refl = new ReflectionClass($ig);
+      foreach ($callpath as $nextnode) {
+        if ($refl->hasMethod($nextnode)) {
+          $ret = $refl->getMethod($nextnode)->invokeArgs($cobj, $bod->args);
+          break;
+        }
+        if ($refl->hasProperty($nextnode)) {
+          $cobj = $refl->getProperty($nextnode)->getValue($ig);
+          $refl = new ReflectionClass($cobj);
+          continue;
+        }
+      }
+
+      // We got no return value :c
+      if (!isset($ret))
+        throw new \Exception('Cannot find method '.$path);
+
+      // Everything's fine, we're ready to send response
       $log->debug('Routine executed successfully, sending response.');
-      return new Response(200, DEFAULT_HEADERS, [
+      return new Response(200, DEFAULT_HEADERS, json_encode([
         'status' => 'OK',
         'data' => $ret,
-      ]);
+      ]));
     }
   } catch (\Throwable $e) {
     // Catch all errors
     $log->error(sprintf('Error processing request %s at %.2f! Caught: %s',
       $path, $req->getServerParams()['REQUEST_TIME_FLOAT'], $e->getMessage()));
     return new Response(500, DEFAULT_HEADERS, json_encode([
+      'status' => 'ERR',
       'error' => $e->getMessage(),
     ]));
   }
