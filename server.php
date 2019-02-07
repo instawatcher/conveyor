@@ -119,7 +119,8 @@ try {
 }
 
 // Listening
-$socket = new \React\Socket\Server(isset($argv[1]) ? $argv[1] : '0.0.0.0:8000', $loop);
+$listenon = isset($argv[1]) ? $argv[1] : '0.0.0.0:8000';
+$socket = new \React\Socket\Server($listenon, $loop);
 $server->listen($socket);
-$log->info('Conveyor listening on *:8000');
+$log->info('Conveyor listening on '.$listenon);
 $loop->run();
