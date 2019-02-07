@@ -6,6 +6,7 @@ use React\Http\Server;
 use React\Http\Response;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use InstagramAPI\Exception\InstagramException;
 
 require_once __DIR__.'/vendor/autoload.php';
 
@@ -67,7 +68,8 @@ $server = new Server(function (ServerRequestInterface $req) use (&$ig, $log) {
 });
 
 // Login
-// TODO: Prepare this for challenges! (note to self: waiting on STDIN usage decision)
+// TODO: What about challenges?
+// TODO: Decide if STDIN could be used for 2FA & Challenges
 $log->info('Hey there! Conveyor 1.0 is booting up!');
 $log->info('Loggin\' you in...');
 try {
@@ -78,6 +80,10 @@ try {
     $log->info('Two-factor login completed. Yay!');
   }
   $log->info('Single-factor login completed. Yay!');
+// } catch (InstagramException $e) {
+//   $log->error('Instagram exception caught!');
+//   print_r($e->getResponse()->getChallenge());
+//   exit(1);
 } catch (\Exception $e) {
   $log->error('Conveyor could not log into your IG account. Exiting. Error: '.$e->getMessage());
   exit(1);
