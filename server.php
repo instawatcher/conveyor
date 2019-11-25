@@ -25,7 +25,7 @@ $ig = new \InstagramAPI\Instagram();
 define('DEFAULT_HEADERS', array(
   'Content-Type' => 'application/json',
   'Pragma' => 'no-cache',
-  'Server' => 'iw-conveyor/1.0',
+  'Server' => 'iw-conveyor/1.1',
   'X-Powered-By' => 'mgp25\'s Instagram API',
 ));
 
@@ -99,7 +99,7 @@ $server = new Server(function (ServerRequestInterface $req) use (&$ig, $log) {
 // Login
 // TODO: What about challenges?
 // TODO: Decide if STDIN could be used for 2FA & Challenges
-$log->info('Hey there! Conveyor 1.0 is booting up!');
+$log->info('Hey there! Conveyor 1.1 is booting up!');
 $log->info('Loggin\' you in...');
 try {
   $loginResp = $ig->login(getenv('IG_USERNAME'), getenv('IG_PASSWORD'));
